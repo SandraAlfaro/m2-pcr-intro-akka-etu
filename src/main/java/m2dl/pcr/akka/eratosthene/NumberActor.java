@@ -11,31 +11,24 @@ public class NumberActor extends UntypedActor {
 
     LoggingAdapter log = Logging.getLogger(getContext().system(), this);
     private ActorRef nextNumberActorRef;
-    private int assignValue;
+    private int assignValue = -1;
 
     public NumberActor() {
         log.info("NumberActor constructor");
     }
 
-    Procedure<Object> assign = new Procedure<Object>() {
-        public void apply(Object value) throws Exception {
-            if (value instanceof Integer) {
-                log.info("Value assign " + value + "!");
-                assignValue = (int) value;
-                getContext().become(end,true);
-            } else {
-                unhandled(value);
-            }
-        }
-    };
-
     Procedure<Object> end = new Procedure<Object>() {
         public void apply(Object value) throws Exception {
             if (value instanceof Integer) {
-                if (((int)value % assignValue) != 0) {
-                    nextNumberActorRef = getContext().actorOf(Props.create(NumberActor.class), "number"+value+"-actor");
-                    nextNumberActorRef.tell(value,getSelf());
-                    getContext().become(intermediate,true);
+                if (assignValue == -1) {
+                    log.info("Value assign " + value + "!");
+                    assignValue = (int) value;
+                } else {
+                    if (((int) value % assignValue) != 0) {
+                        nextNumberActorRef = getContext().actorOf(Props.create(NumberActor.class), "number" + value + "-actor");
+                        nextNumberActorRef.tell(value, getSelf());
+                        getContext().become(intermediate, true);
+                    }
                 }
             } else {
                 unhandled(value);
@@ -58,6 +51,6 @@ public class NumberActor extends UntypedActor {
 
     @Override
     public void onReceive(Object value) throws Exception {
-        assign.apply(value);
+        end.apply(value);
     }
 }

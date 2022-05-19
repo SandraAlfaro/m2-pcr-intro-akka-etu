@@ -10,6 +10,8 @@
 
     <properties>
         <akka.version>2.4.4</akka.version>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
     </properties>
 
     <dependencies>
